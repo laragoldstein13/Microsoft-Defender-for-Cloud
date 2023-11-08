@@ -1,4 +1,4 @@
-# Module 14 – Configuring Azure ADO Connector in Defender for DevOps
+# Module 14 – Configuring Azure DevOps Connector in Defender for Cloud DevOps security
 
 <p align="left"><img src="../Images/asc-labs-intermediate.gif?raw=true"></p>
 
@@ -6,23 +6,23 @@
 #### ⌛ Estimated time to complete this lab: 30 minutes
 
 ## Objectives
-In this exercise, you will learn how to configure Azure ADO Connector in Defender for DevOps.
+In this exercise, you will learn how to configure Azure DevOps Connector in DevOps security.
 
 ### Exercise 1: Preparing the Environment
 
 If you alredy finished [Module 1](https://github.com/Azure/Microsoft-Defender-for-Cloud/blob/main/Labs/Modules/Module-1-Preparing-the-Environment.md) of this lab, you can skip this exercise, otherwise plesae finish at least Exercise 1, 2 and 3 from Module 1.
 
-### Exercise 2: Creating an Azure ADO Trial Subscription
+### Exercise 2: Creating an Azure DevOps Trial Subscription
 
 1.	Open an In-Private session in your web browser and navigate to [https://dev.azure.com](https://dev.azure.com)
 2.	On the main part of this page, click Start free and use your Microsoft account credentials to login. If you don’t want to use your existing credentials, use the Azure Trial subscription account in order to login.
 3.	Type your Account email address and Password and login to your DevOps environment..
 
-### Exercise 3: Configuring Azure ADO Connector
+### Exercise 3: Configuring Azure DevOps Connector
 
 1.	Login to your Azure Portal and open Defender for Cloud dashboard
 2.	In the left navigation pane, click **Environment settings** option
-3.	Click the **Add environment** button and click **Azure DevOps (preview)** option. The **Create Azure DevOps connection** page appears as shown the sample below.
+3.	Click the **Add environment** button and click **Azure DevOps** option. The **Create Azure DevOps connection** page appears as shown the sample below.
 
 ![Azure ADO Connector](../Images/M14_Fig1.PNG?raw=true)
 
@@ -65,7 +65,7 @@ If you alredy finished [Module 1](https://github.com/Azure/Microsoft-Defender-fo
 ![Azure ADO Connector - Extension](../Images/M14_Fig5.PNG?raw=true)
 
 
-> **Note** Admin privileges to the Azure DevOps organization are required to install the extension. If you don’t have access to install the extension, you must request access from your Azure DevOps organization’s administrator during the installation process
+> **Note** Projection Collection Administrator privileges to the Azure DevOps organization are required to install the extension. If you don’t have access to install the extension, you must request access from your Azure DevOps organization’s administrator during the installation process
 
 
 ### Exercise 5: Install Free extension SARIF SAST Scans Tab
@@ -77,11 +77,11 @@ In order to view the scan results (when you execute the pipelines), in an easier
 3.	Follow the same steps as shown in the previous exercise to install this extension in your Azure ADO organization.
 4.	After finishing installing you should see two extensions as shown in the example below:
 
-![Azure ADO Connector - SANS](../Images/M14_Fig6.PNG?raw=true)
+![Azure DevOps Connector - SANS](../Images/M14_Fig6.PNG?raw=true)
 
 ### Exercise 6: Configure your pipeline using YAML 
 
-The purpose of this exercise is to allow you to see how the extension used by Defender for DevOps will check your pipeline. Before start this exercise review the following observations:
+The purpose of this exercise is to allow you to see how the extension used by DevOps security will check your pipeline. Before start this exercise review the following observations:
 - If you are using the free version of Azure DevOps you will receive an error message when executing the pipeline. This message will ask you to visit  https://aka.ms/azpipelines-parallelism-request/ and request increased parallelism in Azure DevOps. This can take 2 to 4 days to occur.
 - An alternative way to create a pipeline is by using a Hosted Build Agent, which is the method used in this exercise. To create your hosted build agent follow the steps from [Module 14 - Appendix 1](Module14-Appendix1.pdf). After finishing these steps, you can continue
 
@@ -110,18 +110,6 @@ The purpose of this exercise is to allow you to see how the extension used by De
 trigger: none
 pool: windows-build-agents
 steps:
-- task: UseDotNet@2
-  displayName: 'Use dotnet'
-  inputs:
-    version: 3.1.x
-- task: UseDotNet@2
-  displayName: 'Use dotnet'
-  inputs:
-    version: 5.0.x
-- task: UseDotNet@2
-  displayName: 'Use dotnet'
-  inputs:
-    version: 6.0.x
 - task: MicrosoftSecurityDevOps@1
   displayName: 'Microsoft Security DevOps'
 ```
@@ -137,7 +125,7 @@ steps:
 
 ![Azure ADO Connector - result](../Images/M14_Fig10.PNG?raw=true)
 
-10. After it finishes you can see scan done by Defender for DevOps. To do that click **Microsoft Security DevOps** section in the left and you will see the output of the actions that were done as shown below:
+10. After it finishes you can see scan done by DevOps security. To do that click **Microsoft Security DevOps** section in the left and you will see the output of the actions that were done as shown below:
 
 ![Azure ADO Connector - scanresult](../Images/M14_Fig11.PNG?raw=true)
 
