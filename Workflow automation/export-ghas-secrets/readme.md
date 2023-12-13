@@ -1,4 +1,4 @@
-# Keep track of resource exemptions 
+# Export GHAS Secrets in Email
 **Author: Lara Goldstein**
 
 With this automation playbook, you can notify stakeholders when a new secrets have been discovered through GitHub Advanced Security.
