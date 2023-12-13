@@ -13,6 +13,7 @@ You can deploy the main template by clicking on the buttons below:
     <img src="https://aka.ms/deploytoazurebutton"/>
 </a>
 
+
 Once you have deployed all resources, you need to authorize the Office 365 API connection. In addition to that, the Logic App uses a system-assigned Managed Identity to query the APIs used in this playbook. To enable the Logic App for this step, you need to grant the Managed Identity at least Reader rights.
 
 To grant the Managed Identity access rights to the respective scope:
