@@ -9,7 +9,7 @@ The template in this folder will deploy a LogicApp and a connection to the Offic
 
 You can deploy the main template by clicking on the buttons below:
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Flaragoldstein13%2Fmaster%2FWorkflow%2520automation%2Fexport-ghas-secrets%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/laragoldstein13/Microsoft-Defender-for-Cloud/main/Workflow%20automation/export-ghas-secrets/azuredeploy.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton"/>
 </a>
 
