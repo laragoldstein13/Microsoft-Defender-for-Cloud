@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "workflow_name": {
-            "defaultValue": "GHAzDO-Secrets-Notifications",
+            "defaultValue": "Notify-GHAS-Secrets",
             "type": "String",
             "metadata": {
                 "description": "Name of the workflow automation"
