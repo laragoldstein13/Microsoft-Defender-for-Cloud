@@ -1,0 +1,346 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflow_name": {
+            "defaultValue": "GHAzDO-Secrets-Notifications",
+            "type": "String",
+            "metadata": {
+                "description": "Name of the workflow automation"
+            }
+        },
+        "recipientEmail": {
+            "defaultValue": "<example@domain.com>",
+            "type": "String",
+            "metadata": {
+              "description": "Specify the recipient email."
+            }
+        },
+          "requiredProjects": {
+            "defaultValue": "'example1','example2','example3'",
+            "type": "String",
+            "metadata": {
+              "description": "Specify the Azure DevOps project names that the email report will be created for."
+            }
+        },
+          "senderEmailAccount": {
+            "defaultValue": "<username>@<domain.com>",
+            "type": "String",
+            "metadata": {
+              "description": "Specify a valid sender email account that you have access to, e.g. your email address. For example, user@contoso.com"
+            }
+        },
+          "lookbackTimeDays": {
+            "defaultValue": "2",
+            "type": "String",
+            "metadata": {
+              "description": "Specify number of days to send report for based on when secret was discovered"
+            }
+        }
+    },
+    "variables": {
+        "office365ConnectionName": "[concat('office365-', parameters('workflow_name'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[variables('office365ConnectionName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+              "displayName": "[parameters('senderEmailAccount')]",
+              "parameterValues": {},
+              "customParameterValues": {},
+              "nonSecretParameterValues": {},
+              "api": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/office365')]"
+              }
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflow_name')]",
+            "location": "eastus",
+            "dependsOn": [
+                "[variables('office365ConnectionName')]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "Recurrence": {
+                            "recurrence": {
+                                "frequency": "Day",
+                                "interval": 1
+                            },
+                            "evaluatedRecurrence": {
+                                "frequency": "Day",
+                                "interval": 1
+                            },
+                            "type": "Recurrence"
+                        }
+                    },
+                    "actions": {
+                        "Create_HTML_table_-_Secrets_Table": {
+                            "runAfter": {
+                                "Parse_JSON_-_Azure_Resource_Graph_Resuts": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Table",
+                            "inputs": {
+                                "columns": [
+                                    {
+                                        "header": "Organization",
+                                        "value": "@item()?['Organization']"
+                                    },
+                                    {
+                                        "header": "Project",
+                                        "value": "@item()?['Project']"
+                                    },
+                                    {
+                                        "header": "Repo",
+                                        "value": "@item()?['Repo']"
+                                    },
+                                    {
+                                        "header": "Secret",
+                                        "value": "@item()?['Secret']"
+                                    },
+                                    {
+                                        "header": "AlertUrl",
+                                        "value": "@item()?['AlertUrl']"
+                                    },
+                                    {
+                                        "header": "TimeFound",
+                                        "value": "@item()?['timeFound']"
+                                    }
+                                ],
+                                "format": "HTML",
+                                "from": "@body('Parse_JSON_-_Azure_Resource_Graph_Resuts')?['data']"
+                            }
+                        },
+                        "HTTP_-_Azure_Resource_Graph_": {
+                            "runAfter": {
+                                "Initialize_variable_-_Email_to_send_report_to": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Http",
+                            "inputs": {
+                                "authentication": {
+                                    "type": "ManagedServiceIdentity"
+                                },
+                                "body": {
+                                    "query": "securityresources | where type == 'microsoft.security/assessments/subassessments' | extend assessmentKey = extract('.*assessments/(.+?)/.*', 1, id) | where assessmentKey == 'b5ef903f-8655-473b-9784-4f749eeb25c6' or assessmentKey == 'dd98425c-1407-40cc-8a2c-da5d0a2f80da' | project properties, assessmentKey, id | extend Source = tostring(properties.resourceDetails.source) | extend Repo = tostring(iff(Source == 'GitHub', split(id,'/')[14], split(id,'/')[16])), Project = tostring(iff(Source == 'AzureDevOps', split(id,'/')[14], 'N/A')), Organization = tostring(iff(Source == 'GitHub', split(id,'/')[12], split(id,'/')[12])) | extend VulId = tostring(properties.id), Severity = tostring(properties.status.severity), Status = tostring(properties.status.code), Secret = tostring(iff(Source == 'GitHub', properties.description, properties.displayName)), Location = tostring(properties.additionalData.data.Locations_Url), File = tostring(properties.additionalData.data.File), AlertUrl = tostring(properties.additionalData.data.Html_Url), Line = tostring(properties.additionalData.data.Line), timeGenerated = tostring(properties.additionalData.data.Creation_Date) | where Project in (@{variables('Projects')}) | extend timeGenerated = tostring(properties.additionalData.data.Creation_Date) | extend newTime = replace('\"', '', timeGenerated) | extend timeFound = todatetime(newTime), dismissalType = tostring(properties.additionalData.data.DismissalType) | where timeFound >= ago(@{variables('LookbackTime')}d) | project Source, Organization, Project, Repo, Status, Secret, Location, File, AlertUrl, Line, timeFound, dismissalType | order by timeFound desc"
+                                },
+                                "headers": {
+                                    "Content-Type": "application/json"
+                                },
+                                "method": "POST",
+                                "uri": "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2021-03-01"
+                            }
+                        },
+                        "Initialize_variable_-_Email_to_send_report_to": {
+                            "runAfter": {
+                                "Initialize_variable_-_Lookback_time": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "EmailAddress",
+                                        "type": "string",
+                                        "value": "[parameters('recipientEmail')]"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_variable_-_Lookback_time": {
+                            "runAfter": {
+                                "Initialize_variable_-_Projects_('example1',_'example2')": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "LookbackTime",
+                                        "type": "string",
+                                        "value": "[parameters('lookbackTimeDays')]"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_variable_-_Projects_('example1',_'example2')": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Projects",
+                                        "type": "string",
+                                        "value": "[parameters('requiredProjects')]"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_variable_-_Secrets_Table": {
+                            "runAfter": {
+                                "Create_HTML_table_-_Secrets_Table": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Email",
+                                        "type": "string",
+                                        "value": "@body('Create_HTML_table_-_Secrets_Table')"
+                                    }
+                                ]
+                            }
+                        },
+                        "Parse_JSON_-_Azure_Resource_Graph_Resuts": {
+                            "runAfter": {
+                                "HTTP_-_Azure_Resource_Graph_": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@body('HTTP_-_Azure_Resource_Graph_')",
+                                "schema": {
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "items": {
+                                                "properties": {
+                                                    "AlertUrl": {
+                                                        "type": "string"
+                                                    },
+                                                    "File": {
+                                                        "type": "string"
+                                                    },
+                                                    "Line": {
+                                                        "type": "string"
+                                                    },
+                                                    "Location": {
+                                                        "type": "string"
+                                                    },
+                                                    "Organization": {
+                                                        "type": "string"
+                                                    },
+                                                    "Project": {
+                                                        "type": "string"
+                                                    },
+                                                    "Repo": {
+                                                        "type": "string"
+                                                    },
+                                                    "Secret": {
+                                                        "type": "string"
+                                                    },
+                                                    "Source": {
+                                                        "type": "string"
+                                                    },
+                                                    "Status": {
+                                                        "type": "string"
+                                                    },
+                                                    "dismissalType": {
+                                                        "type": "string"
+                                                    },
+                                                    "timeFound": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "AlertUrl",
+                                                    "File",
+                                                    "Line",
+                                                    "Location",
+                                                    "Organization",
+                                                    "Project",
+                                                    "Repo",
+                                                    "Secret",
+                                                    "Source",
+                                                    "Status",
+                                                    "dismissalType",
+                                                    "timeFound"
+                                                ],
+                                                "type": "object"
+                                            },
+                                            "type": "array"
+                                        },
+                                        "facets": {
+                                            "type": "array"
+                                        },
+                                        "resultTruncated": {
+                                            "type": "string"
+                                        },
+                                        "totalRecords": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "Send_an_email_(V2)": {
+                            "runAfter": {
+                                "Initialize_variable_-_Secrets_Table": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "Body": "<p>Secrets have been discovered in the following locations:<br>\n<br>\n@{variables('Email')}</p>",
+                                    "Importance": "Normal",
+                                    "Subject": "GHAzDO Secrets",
+                                    "To": "@variables('EmailAddress')"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['office365']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/v2/Mail"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "office365": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', variables('office365ConnectionName'))]",
+                                "connectionName": "[variables('office365ConnectionName')]",
+                                "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/office365')]"                
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
