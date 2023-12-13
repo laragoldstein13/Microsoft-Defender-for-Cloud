@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "workflow_name": {
-            "defaultValue": "Notify-GHAS-Secrets",
+            "defaultValue": "Notify-DevOps-Secrets",
             "type": "String",
             "metadata": {
                 "description": "Name of the workflow automation"
