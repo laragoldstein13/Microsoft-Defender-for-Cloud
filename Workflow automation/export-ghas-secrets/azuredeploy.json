@@ -319,8 +319,7 @@
                                 "path": "/v2/Mail"
                             }
                         }
-                    },
-                    "outputs": {}
+                    }
                 },
                 "parameters": {
                     "$connections": {
