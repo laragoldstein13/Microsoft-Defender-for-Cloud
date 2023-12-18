@@ -313,11 +313,7 @@
                                     "Importance": "Normal",
                                     "Subject": "GHAzDO Secrets",
                                     "To": "@variables('EmailAddress')"
-                                },
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['office365']['connectionId']"
-                                    }
+                                }
                                 },
                                 "method": "post",
                                 "path": "/v2/Mail"
