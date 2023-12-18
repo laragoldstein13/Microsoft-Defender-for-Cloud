@@ -54,7 +54,7 @@
               "customParameterValues": {},
               "nonSecretParameterValues": {},
               "api": {
-                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/office365')]"
+                  "id": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Web/locations/', resourceGroup().location, '/managedApis/office365')]"                
               }
             }
         },
@@ -313,13 +313,18 @@
                                     "Importance": "Normal",
                                     "Subject": "GHAzDO Secrets",
                                     "To": "@variables('EmailAddress')"
-                                }
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['office365']['connectionId']"
+                                    }
                                 },
                                 "method": "post",
                                 "path": "/v2/Mail"
                             }
                         }
-                    }
+                    },
+                    "outputs": {}
                 },
                 "parameters": {
                     "$connections": {
