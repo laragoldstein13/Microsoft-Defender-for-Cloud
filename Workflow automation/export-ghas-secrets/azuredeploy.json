@@ -63,9 +63,6 @@
             "apiVersion": "2017-07-01",
             "name": "[parameters('workflow_name')]",
             "location": "eastus",
-            "dependsOn": [
-                "[variables('office365ConnectionName')]"
-            ],
             "identity": {
                 "type": "SystemAssigned"
             },
