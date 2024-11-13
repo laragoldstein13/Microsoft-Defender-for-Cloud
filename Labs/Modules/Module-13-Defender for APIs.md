@@ -4,7 +4,7 @@
 
 #### 🎓 Level: 300 (Advanced)
 #### ⌛ Estimated time to complete this lab: 120 minutes
-#### 💁 Author: Liana Anca Tomescu 
+#### 💁 Author: Walner Dort
 
 
 ## Objectives
@@ -92,9 +92,10 @@ Note: It will take up to 45 minutes for the API you just created to appear in De
 ### Exercise 4: ONBOARD APIS TO DEFENDER FOR APIS
 Next, you will onboard that API to be protected by Defender for API.
 1.	Navigate to the **Recommendations** pane in Microsoft Defender for Cloud
-2.	Under the category “Enable enhanced security features” select the recommendation **Azure API Management APIs should be onboarded to Defender for APIs**. 
+2.	Type "Defender for APIs" within the search box and select the recommendation **Azure API Management APIs should be onboarded to Defender for APIs**. 
 
-![](../Images/api8.png?raw=true)
+<img width="940" alt="image" src="https://github.com/user-attachments/assets/f3399538-9ef1-4770-ad18-88b9b2ce19ab">
+
  
 3.	In the recommendation **Azure API Management APIs should be onboarded to Defender for APIs**, tick the box of the API labs-test and echo-api that you would like to onboard, and click **Fix**.
 
@@ -152,13 +153,11 @@ Next, you will explore other Defender for API recommendations.
 
 ![](../Images/api17.png?raw=true)
  
-4.	Expand **Manage access and permissions, Enable enhanced security features and Implement security best practices**, to see the API recommendations that belong to these controls.
+4.	Select the recommendation **API Management services should use a virtual network**.
+   
+<img width="947" alt="image" src="https://github.com/user-attachments/assets/8be5a15d-7fc3-4c37-bbd7-f79d436d2c18">
 
-
-![](../Images/api18.png?raw=true)
- 
-5.	Select the recommendation **API Management services should use a virtual network**.
-6.	Explore this recommendation by looking at what’s displayed, such as **Unhealthy resources**.
+5.	Explore this recommendation by looking at what’s displayed, such as **Unhealthy resources**.
 
 ![](../Images/api19.png?raw=true)
    
